@@ -1,4 +1,13 @@
-import { QueryInterface } from 'sequelize';
+import { literal, QueryInterface } from 'sequelize';
+import {
+  addYears,
+  format,
+  subYears,
+  setMonth,
+  setDate,
+  setHours,
+} from 'date-fns';
+import { ModelAttributes } from 'sequelize/types/model';
 
 export default {
   /**
@@ -31,8 +40,197 @@ export default {
    * As a cinema owner I don't want to configure the seating for every show
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  up: (queryInterface: QueryInterface): Promise<void> => {
-    throw new Error('TODO: implement migration in task 4');
+
+
+  // ************Notes*************
+
+// I considered just only one cinema
+
+  up: async (queryInterface: QueryInterface) => {
+    await queryInterface.createTable('movie_details', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      movie_name: { type: 'varchar' },
+      movie_time: { type: 'timestamp' },
+      show_room: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'show_room',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      booking_status: { type: "boolean", default: false },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('users', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      first_name: { type: 'varchar' },
+      last_time: { type: 'timestamp' },
+      type: { type: 'enum', default: "user"},
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('show_room', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: { type: 'varchar' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('seats', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      seat_number: { type: "varchar" },
+      seat_category: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'seat_category',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      show_room: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'show_room',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      price: { type: 'varchar' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('seat_category', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      category_name: { type: "varchar" },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('bookings', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      booking_number: { type: "varchar" },
+      movie_details: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'movie_details',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      seat_details: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'seats',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      }, 
+      show_room: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'show_room',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      user: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'user',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+    // throw new Error('TODO: implement migration in task 4');
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
